@@ -1,1 +1,41 @@
+// TO BE GRADED Märta Ågren Sandra Victorsson
 
+const test_curve = t => make_point(t, 0.5 + (math_sin(4 * (math_PI * t)) / 2));
+
+/**
+ * Stack two curves. The first curve occupies one fraction of the space,
+ * the second curve the rest.
+ * @example
+ * draw_points(10000)(stack_frac(1/5, test_curve, test_curve));
+ * @param   {number} frac - the fraction of space the first curve occupies.
+ * @param   {Curve} c1 - the first curve, put on the bottom.
+ * @param   {Curve} c2 - the second curve, put on top.
+ * @precondition 0 < frac < 1
+ * @returns {Curve} two stacked curves.
+ */
+function stack_frac(frac, c1, c2) {
+    return t => t < frac
+                ? make_point(x_of(c1(t / frac)),
+                             y_of(c1(t / frac)) * frac)
+                : make_point(x_of(c2((t - frac) / (1 - frac))),
+                             y_of(c2((
+                                 t - frac) / (1 - frac))) * (1 - frac) + frac);
+}
+
+/**
+ * Stack multiple copies of the same curve.
+ * Each copy occupies the same fraction of the height.
+ * @param   {number} n - the number of copies
+ * @param   {Curve} c
+ * @precondition n >= 1
+ * @returns {Curve} n stacked copies of c
+ */
+function stack_n(n, c) {
+    // variant: n
+    return n === 1
+           ? c
+           : stack_frac(1 / n, c, stack_n(n - 1, c));
+}
+
+// Test
+draw_points(10000)(stack_n(5, test_curve));
