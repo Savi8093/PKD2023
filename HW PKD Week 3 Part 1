@@ -1,0 +1,88 @@
+//TO BE GRADED Märta Ågren Sandra Victorsson
+const ex_text = list("a", "rose", "is", "a", "rose",
+                     "but", "so", "is", "a", "rose");
+
+/**
+ * Removes duplicate entries in a list.
+ * @example
+ * // returns list(1, 2, 5, 3)
+ * remove_duplicates(list(1, 2, 2, 5, 3, 1, 5, ))
+ * // returns list("a", "rose", "is")
+ * remove_duplicates(list("a", "rose", "is", "a", "rose")
+ * @param {List} lst - List of strings or numbers
+ * @returns {List} - List of numbers or strings without duplicate elements
+ */
+function remove_duplicates(lst) {
+        return accumulate((x, y) => pair(x, remove_all(x, y)), null, lst);
+    }
+/**
+ * Counts the number of unique words in a list of words.
+ * @example
+ * num_unique_words(list("a", "rose", "is", "a", "rose"))  // returns 3
+ * num_unique_words(list())   // returns 0
+ * @param {List} text - List of words (strings)
+ * @returns {number} - Number of unique words in `text`
+ */
+function num_unique_words(text) {
+    return length(remove_duplicates(text));
+}
+display(num_unique_words(ex_text));
+
+/**
+ * Tallies the words in a text.
+ * @example
+ * word_tally(list("a", "rose", "is", "a", "rose",
+ *                 "but", "so", "is", "a", "rose"));
+ * // returns list(["but", 1], ["so", 1], ["is", 2], ["a", 3], ["rose", 3])
+ * word_tally(list())   // returns list()
+ * @param {List} text - List of words (strings)
+ * @returns {List} - List of pairs, one pair for each unique word in `text` with
+ *     a count of how often that word appears in `text`.
+ */
+function word_tally(text) {
+    // counts instances of word in lst and returns count.
+    function count_word(word, lst, count) {
+        // variant: length(lst)
+        return is_null(lst)
+                   ? count
+               : head(lst) === word
+                   ? count_word(word, tail(lst), count + 1)
+               : count_word(word, tail(lst), count);
+    }
+    const unduplicated_text = remove_duplicates(text);
+    return accumulate((x, y) => pair(pair(x, count_word(x, text, 0)), y),
+                      null, unduplicated_text);
+}
+
+display(word_tally(ex_text));
+
+/**
+ * Identifies the most commonly used words in a text and their count.
+ * @example
+ * most_used_words(list("a", "rose", "is", "a", "rose",
+ *                     "but", "so", "is", "a", "rose"))
+ * // returns list(["rose", 3], ["a", 3])
+ * most_used_words(list())   // returns list()
+ * @param {List} text - List of words (strings)
+ * @returns {List} - List of pairs, one pair for each distinct most commonly
+ *     used word in `text` with a count of how often that word appears in `text`.
+ */
+function most_used_words(text) {
+    const counted_text = word_tally(text);
+    return accumulate((x, y) => is_null(y)
+                                    ? x
+                                : is_pair(tail(y))
+                                    ? tail(x) === tail(head(y))
+                                        ? pair(x, y)
+                                    : tail(x) > tail(head(y))
+                                        ? x
+                                    : y
+                                : tail(x) === tail(y)
+                                    ? pair(x, y)
+                                : tail(x) > tail(y)
+                                    ? x
+                                : y,
+                      null, counted_text);
+}
+
+display(most_used_words(ex_text));
