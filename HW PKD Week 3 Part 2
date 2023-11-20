@@ -1,0 +1,54 @@
+/*function word_tally(text) {
+    // counts instances of word in lst and returns count.
+    function count_word(word, lst, count) {
+        // variant: length(lst)
+        return is_null(lst)
+                   ? count
+               : head(lst) === word
+                   ? count_word(word, tail(lst), count + 1)
+               : count_word(word, tail(lst), count);
+    }
+    const unduplicated_text = remove_duplicates(text);
+    return accumulate((x, y) => pair(pair(x, count_word(x, text, 0)), y),
+                      null, unduplicated_text);
+}*/
+
+//const ex_text = list("a", "rose", "is", "a", "rose", "but", "so", "is", "a", "rose");
+const ex_text = list("time", "for", "a", "break");
+/**
+ * Finds all pairs of adjacent words in a given text.
+ * @example
+ * adjacent_pairs(list("time", "for", "a", "break"))
+ * // returns list(["time", "for"], ["for", "a"], ["a", "break"])
+ * adjacent_pairs(list("time"))   // returns list()
+ * @param {List} text - List of words (strings)
+ * @returns {List} List of pairs, one pair for each pair of words that appear
+ *     after one another (in that order) in `text`
+ */
+function adjacent_pairs(text) {
+    return accumulate((x, y) => is_null(y)
+                                ? pair(x, y)
+                                : is_null(tail(y))
+                                ? pair(x, head(y))
+                                : pair(pair(x, head(y)), tail(y)), 
+                      null, text);
+}
+display_list(adjacent_pairs(ex_text));
+
+/**
+ * Counts how often pairs of words appear in a text.
+ * The order of words in a pair do not matter, i.e. ["a", "b"] is the same
+ * as ["b", "a"] and any one of these pairs may appear in the result.
+ * @example
+ * pairs_count(pairs_count(list("time", "for", "a", "break", "a", "break",
+ *                              "for", "a", "while")))
+ * // returns
+ * // list([["for", "time"], 1], [["a", "break"], 3], [["break", "for"], 1],
+ * //      [["a", "for"], 2], [["a", "while"], 1])
+ * @param {List} text - List of words (strings).
+ * @returns {List} List of pairs, each pair consist of a pair of words that
+ *     appear next to each other in `text` and a count of how often it appears
+ */
+function pairs_count(text) {
+    // your code here
+}
