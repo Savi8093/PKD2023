@@ -1,20 +1,38 @@
-/*function word_tally(text) {
-    // counts instances of word in lst and returns count.
-    function count_word(word, lst, count) {
-        // variant: length(lst)
-        return is_null(lst)
-                   ? count
-               : head(lst) === word
-                   ? count_word(word, tail(lst), count + 1)
-               : count_word(word, tail(lst), count);
-    }
-    const unduplicated_text = remove_duplicates(text);
-    return accumulate((x, y) => pair(pair(x, count_word(x, text, 0)), y),
-                      null, unduplicated_text);
-}*/
+//TO BE GRADED Märta Ågren Sandra Victorsson
 
-//const ex_text = list("a", "rose", "is", "a", "rose", "but", "so", "is", "a", "rose");
-const ex_text = list("time", "for", "a", "break");
+const ex_text = list("so", "is", "a", "rose", "is", "a", "rose",
+                     "but", "so", "is", "a", "rose", "so", "is");
+const ex_text2 = list("time", "for", "a", "break",
+                      "a", "break", "for", "a", "while");
+
+// Helper function to check if one pair is equal to another pair
+function is_pair_equal(p1, p2) {
+    return equal(p1, p2) || equal(pair(tail(p1), head(p1)), p2);
+}
+
+/**
+ * Removes duplicate pairs from a list with the following structure:
+ * list([["so", "is"], 3], [["is", "a"], 3], [["a", "rose"], 2])
+ * checking the first element of the pairs, which is itself a pair.
+ * @example
+ * // returns list([["a", "rose"], 2])
+ * remove_pair_duplicates(list(pair(pair("a", "rose"), 2),
+ *                             pair(pair("rose", "a"), 2)));
+ * @param {List} lst - List of pairs
+ * @returns {List} - List of pairs without duplicate elements
+ */
+function remove_pair_duplicates(lst) {
+    // variant: length(lst)
+    function remove_pair(p, lst) {
+        return is_null(lst)
+                   ? lst
+               : is_pair_equal(p, head(head((lst))))
+                   ? remove_pair(p, tail(lst))
+               : pair(head(lst), remove_pair(p, tail(lst)));
+    }
+    return accumulate((x, y) => pair(x, remove_pair(head(x), y)), null, lst);
+}
+
 /**
  * Finds all pairs of adjacent words in a given text.
  * @example
@@ -26,14 +44,14 @@ const ex_text = list("time", "for", "a", "break");
  *     after one another (in that order) in `text`
  */
 function adjacent_pairs(text) {
-    return accumulate((x, y) => is_null(y)
-                                ? pair(x, y)
-                                : is_null(tail(y))
-                                ? pair(x, head(y))
-                                : pair(pair(x, head(y)), tail(y)), 
-                      null, text);
+    // variant: length(y)
+    function pair_words(x, y) {
+        return is_null(y)
+               ? list()
+               : pair(pair(x, head(y)), pair_words(head(y), tail(y)));
+    }
+    return pair_words(head(text), tail(text));
 }
-display_list(adjacent_pairs(ex_text));
 
 /**
  * Counts how often pairs of words appear in a text.
@@ -49,6 +67,29 @@ display_list(adjacent_pairs(ex_text));
  * @returns {List} List of pairs, each pair consist of a pair of words that
  *     appear next to each other in `text` and a count of how often it appears
  */
+
 function pairs_count(text) {
-    // your code here
+    const new_text = adjacent_pairs(text);
+    // counts instances of word in lst and returns count.
+    function count_word(word, lst, count) {
+        // variant: length(lst)
+        return is_null(lst) || is_null(tail(lst))
+                   ? count
+               : is_pair_equal(word, head(tail(lst)))
+                   ? count_word(word, tail(lst), count + 1)
+               : count_word(word, tail(lst), count);
+    }
+    const counted_text = accumulate((x, y) => pair(pair(x,
+                                                        count_word(
+                                                            x, pair(x,
+                                                                    new_text),
+                                                                    0)),
+                                                   y),
+                                    null, new_text);
+    return remove_pair_duplicates(counted_text);
 }
+display_list(pairs_count(ex_text));
+
+
+
+
