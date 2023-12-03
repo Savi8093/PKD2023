@@ -1,0 +1,142 @@
+// TASK 1
+
+const WIDTH = 400;
+const HEIGHT = 300;
+const FPS = 1;
+
+/**
+ * Swaps the color channels of an image: R -> G -> B -> R.
+ * @param {array} src - contains the source image
+ * @param {array} dest - array where the channel-changed image is copied into
+ */
+function color_rotate(src, dest) {
+    const width = image_width();
+    const height = image_height();
+
+    for (let y = 0; y < height; y = y + 1) {
+        for (let x = 0; x < width; x = x + 1) {
+            set_rgba(dest[y][x],
+  	             blue_of(src[y][x]),
+	             red_of(src[y][x]),
+	             green_of(src[y][x]),
+	             alpha_of(src[y][x]));
+        }
+    }
+}
+
+/**
+ * Vertically flips an image.
+ * @param {array} src - contains the source image
+ * @param {array} dest - array where the flipped source image is copied into
+ */
+function flip_vertically(src, dest) {
+    const width = image_width();
+    const height = image_height();
+
+    for (let i = 0; i < height; i = i + 1) {
+        for (let j = 0; j < width; j = j + 1) {
+            set_rgba(dest[height - 1 - i][j],
+	             red_of(src[i][j]),
+	             green_of(src[i][j]),
+	             blue_of(src[i][j]),
+	             alpha_of(src[i][j]));
+        }
+    }
+}
+
+/**
+ * Creates an image with given dimensions with each pixel having maximal
+ * intensity of red, green and blue.
+ * @param {number} width - width of the image to be generated
+ * @param {number} height - height of the image to be generated
+ * @returns {array} Returns a 3 dimensional array representing the image
+ */
+function make_image(width, height) {
+    const img = [];
+    for (let i = 0; i < height; i = i + 1) {
+        const row = [];
+        img[i] = row;
+        for (let j = 0; j < width; j = j + 1) {
+            row[j] = [];
+	    set_rgba(row[j], 255, 255, 255, 255);
+        }
+    }
+    return img;
+}
+
+
+/**
+ * Overlays a crosshair pattern over the image in src and writes the result
+ * into dest.
+ *
+ * @param {array} src - input image
+ * @param {array} dest - output image
+ */
+function crosshair(src, dest) {
+    const width = image_width();
+    const height = image_height();
+    const y_mid = height / 2;
+    const x_mid = width / 2;
+    
+    const radius = math_min(width, height) / 2;
+    
+    for (let i = 0; i < height; i = i + 1) {
+        
+        for (let j = 0; j < width; j = j + 1) {
+            const distance_x = math_abs(i - y_mid);
+            const distance_y = math_abs(j - x_mid);
+            const distance = math_sqrt(distance_x * distance_x +
+                                 distance_y * distance_y);
+            const in_circle = distance <= radius;
+            if (i === y_mid ||
+                j === x_mid) {
+                set_rgba(dest[i][j],
+	             255,
+	             green_of(src[i][j]),
+	             blue_of(src[i][j]),
+	             alpha_of(src[i][j]));
+            } else if (in_circle) {
+                set_rgba(dest[i][j],
+	             red_of(src[i][j]),
+	             green_of(src[i][j]),
+	             255,
+	             alpha_of(src[i][j]));
+            } else {
+                set_rgba(dest[i][j],
+    	             red_of(src[i][j]),
+    	             green_of(src[i][j]),
+    	             blue_of(src[i][j]),
+    	             alpha_of(src[i][j]));
+            }
+        }
+    }
+}
+
+/**
+ * Applies two filters one after another.
+ *
+ * @param {function} filter1 - filter to apply first
+ * @param {function} filter2 - filter to apply second
+ * @returns {function} Returns a function that takes a source and destination
+ *   image and applies the filters in the destination.
+ */
+function compose(filter1, filter2) {
+    return (src, dest) => {
+    const temp = make_image(image_width(), image_height());
+    filter1(src, temp);
+    filter2(temp, dest);
+  };
+}
+
+//install_filter(color_rotate);
+// install_filter(flip_vertically);
+// use this filter when crosshair function is ready:
+install_filter(crosshair);
+//install_filter(compose(flip_vertically, color_rotate));
+
+// uncomment the following line to use a still image instead of video:
+use_image_url("https://upload.wikimedia.org/wikipedia/commons/3/31/William_Shakespeare_1609.jpg");
+set_dimensions(WIDTH, HEIGHT);
+keep_aspect_ratio(true);
+set_fps(FPS);
+start();
