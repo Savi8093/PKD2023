@@ -1,0 +1,276 @@
+// TASK 1
+
+const WIDTH = 400;
+const HEIGHT = 300;
+const FPS = 15;
+
+/**
+ * Swaps the color channels of an image: R -> G -> B -> R.
+ * @param {array} src - contains the source image
+ * @param {array} dest - array where the channel-changed image is copied into
+ */
+function color_rotate(src, dest) {
+    const width = image_width();
+    const height = image_height();
+
+    for (let y = 0; y < height; y = y + 1) {
+        for (let x = 0; x < width; x = x + 1) {
+            set_rgba(dest[y][x],
+  	             blue_of(src[y][x]),
+	             red_of(src[y][x]),
+	             green_of(src[y][x]),
+	             alpha_of(src[y][x]));
+        }
+    }
+}
+
+/**
+ * Vertically flips an image.
+ * @param {array} src - contains the source image
+ * @param {array} dest - array where the flipped source image is copied into
+ */
+function flip_vertically(src, dest) {
+    const width = image_width();
+    const height = image_height();
+
+    for (let i = 0; i < height; i = i + 1) {
+        for (let j = 0; j < width; j = j + 1) {
+            set_rgba(dest[height - 1 - i][j],
+	             red_of(src[i][j]),
+	             green_of(src[i][j]),
+	             blue_of(src[i][j]),
+	             alpha_of(src[i][j]));
+        }
+    }
+}
+/**
+ * Creates an image with given dimensions with each pixel having maximal
+ * intensity of red, green and blue.
+ * @param {number} width - width of the image to be generated
+ * @param {number} height - height of the image to be generated
+ * @returns {array} Returns a 3 dimensional array representing the image
+ */
+function make_image(width, height) {
+    const img = [];
+    for (let i = 0; i < height; i = i + 1) {
+        const row = [];
+        img[i] = row;
+        for (let j = 0; j < width; j = j + 1) {
+            row[j] = [];
+	    set_rgba(row[j], 255, 255, 255, 255);
+        }
+    }
+    return img;
+}
+
+function draw_crosshair(picture) {
+    const width = image_width();
+    const height = image_height();
+    
+    const img = [];
+    for (let y = 0; y < height; y = y + 1) {
+        const row = [];
+        img[y] = row;
+        for (let x = 0; x < width; x = x + 1) {
+            row[x] = [];
+	        
+	        if(y === height / 2 || x === width / 2) {
+                set_rgba(row[x], 255, 0, 0, 200);
+            }
+            else {
+                // Keep the original pixel values for non-crosshair pixels
+                set_rgba(row[x],
+                    red_of(picture[y][x]),
+                    green_of(picture[y][x]),
+                    blue_of(picture[y][x]),
+                    alpha_of(picture[y][x]));
+            }
+        }
+    }
+    
+    return img;
+}
+ 
+function circles(picture) {
+    const width = image_width();
+    const height = image_height();
+    
+    const origin_y = height / 2;
+    const origin_x = width / 2;
+    const radius = 25;
+    
+    const circle_img = [];
+    for (let i = 0; i < height; i = i + 1) {
+        const row = [];
+        circle_img[i] = row;
+        for (let j = 0; j < width; j = j + 1) {
+            row[j] = 0;
+        }
+    }
+    
+    const max_circles_x = origin_y / radius;
+    const max_circles_y = origin_x / radius;
+    const max_circles = max_circles_x > max_circles_y 
+                                      ? max_circles_x 
+                                      : max_circles_y + 2;
+    
+    for (let i = max_circles; i > 0; i = i - 1) {
+        draw_circle(origin_x, origin_y, width, height, radius * i, circle_img, math_abs(i % 2) === 1 ? 1 : 2);
+    }
+    
+    const img = [];
+    for (let y = 0; y < height; y = y + 1) {
+        const row = [];
+        img[y] = row;
+        for (let x = 0; x < width; x = x + 1) {
+            row[x] = [];
+            
+	        // 2 = blue
+	        let color_code = circle_img[y][x];
+	        if(color_code === 2) {
+            	set_rgba(row[x], 
+            	    red_of(picture[y][x]),
+            	    green_of(picture[y][x]), 
+            	    255, 
+            	    alpha_of(picture[y][x]));
+            } else {
+            	// Keep the original pixel values for non-crosshair pixels
+                set_rgba(row[x],
+                    red_of(picture[y][x]),
+                    green_of(picture[y][x]),
+                    blue_of(picture[y][x]),
+                    alpha_of(picture[y][x]));
+            }
+        }
+    }
+
+    return img;
+}
+
+function draw_circle(x0, y0, width, height, radius, img, color_code) {
+  let x = radius;
+  let y = 0;
+  let radiusError = 1 - x;
+  
+  while (x >= y) {
+      
+    /* 
+     *  0 | 0
+     *  -----
+     *  0 | X
+     */ 
+    for (let i = x + x0; i >= x0; i = i - 1) {
+        if (height > y + y0 && width > i) {
+            img[y + y0][i] = color_code;
+        }
+    }
+    
+    for (let i = y + x0; i >= x0; i = i - 1) {
+        if (height > x + y0 && width > i) {
+            img[x + y0][i] = color_code;
+        }
+    }
+    /* 
+     *  0 | 0
+     *  -----
+     *  X | 0
+     */ 
+    for (let i = -x + x0; i <= x0; i = i + 1) {
+        if (height > y + y0 && 0 <= i) {
+            img[y + y0][i] = color_code;
+        }
+    }
+    
+    for (let i = -y + x0; i <= x0; i = i + 1) {
+        if (height > x + y0 && 0 <= i) {
+            img[x + y0][i] = color_code;
+        }
+    }
+    
+    /* 
+     *  X | 0
+     *  -----
+     *  0 | 0
+     */ 
+    for (let i = -x + x0; i <= x0; i = i + 1) {
+        if (-y + y0 >= 0 && 0 <= i) {
+            img[-y + y0][i] = color_code;
+        }
+    }
+    
+    for (let i = -y + x0; i <= x0; i = i + 1) {
+        if (-x + y0 >= 0 && 0 <= i) {
+            img[-x + y0][i] = color_code;
+        }
+    }
+    
+    /* 
+     *  0 | X
+     *  -----
+     *  0 | 0
+     */ 
+    for (let i = x + x0; i >= x0; i = i - 1) {
+        if (-y + y0 >= 0 && width > i) {
+            img[-y + y0][i] = color_code;
+        }
+    }
+    
+    for (let i = y + x0; i >= x0; i = i - 1) {
+        if (-x + y0 >= 0 && width > i) {
+            img[-x + y0][i] = color_code;
+        }
+    }
+    
+    y = y + 1;
+    
+    if (radiusError < 0) {
+        radiusError = radiusError + (2 * y + 1);
+        
+    }
+    else {
+        x = x - 1;
+        radiusError = radiusError + (2 * (y - x + 1));
+    }
+  }
+}
+
+function draw_picture(src, dest) {
+    let c = circles(src);
+    let ch = draw_crosshair(c);
+    
+    for (let y = 0; y < HEIGHT; y = y + 1) {
+        for (let x = 0; x < WIDTH; x = x + 1) {
+            // Keep the original pixel values 
+            set_rgba(dest[y][x],
+                red_of(ch[y][x]),
+                green_of(ch[y][x]),
+                blue_of(ch[y][x]),
+                alpha_of(ch[y][x]));
+        }
+    }
+}
+/**
+ * Applies two filters one after another.
+ *
+ * @param {function} filter1 - filter to apply first
+ * @param {function} filter2 - filter to apply second
+ * @returns {function} Returns a function that takes a source and destination
+ *   image and applies the filters in the destination.
+ */
+function compose(filter1, filter2) {
+    return (src, dest) => {
+    const temp = make_image(image_width(), image_height());
+    filter1(src, temp);
+    filter2(temp, dest);
+  };
+}
+
+install_filter(draw_picture);
+//install_filter(compose(color_rotate, flip_vertically));
+
+// uncomment the following line to use a still image instead of video:
+use_image_url("https://upload.wikimedia.org/wikipedia/commons/3/31/William_Shakespeare_1609.jpg");
+set_dimensions(WIDTH, HEIGHT);
+keep_aspect_ratio(true);
+set_fps(FPS);
+start();
