@@ -1,3 +1,4 @@
+//DO NOT GRADE
 // TASK 1
 
 const WIDTH = 400;
@@ -62,7 +63,11 @@ function make_image(width, height) {
     }
     return img;
 }
-
+/**
+ * Overlays a crosshair in picture and changing pixel color
+ * @param {array} picture - source image
+ * @returns {array} Returns a 3 dimensional array representing the image
+ */ 
 function draw_crosshair(picture) {
     const width = image_width();
     const height = image_height();
@@ -90,7 +95,11 @@ function draw_crosshair(picture) {
     
     return img;
 }
- 
+/**
+ * Overlays circles in the picture and changing pixel color
+ * @param {array} picture - source image
+ * @returns {array} Returns a 3 dimensional array representing the image
+ */ 
 function circles(picture) {
     const width = image_width();
     const height = image_height();
@@ -146,7 +155,16 @@ function circles(picture) {
 
     return img;
 }
-
+/**
+ * Determine where the circles should go in the image.
+ * @param {number} x0 - midpoint of x-axis.
+ * @param {number} y0 - midpoint of y-axis.
+ * @param {number} width - width of image
+ * @param {number} height - height of image
+ * @param {number} radius - circle radius
+ * @param {array} img - empty array the same size as image.
+ * @param {number} color_code - changes 
+ */
 function draw_circle(x0, y0, width, height, radius, img, color_code) {
   let x = radius;
   let y = 0;
@@ -233,8 +251,14 @@ function draw_circle(x0, y0, width, height, radius, img, color_code) {
     }
   }
 }
-
-function draw_picture(src, dest) {
+/**
+ * Overlays a crosshair pattern over the image in src and writes the result
+ * into dest.
+ *
+ * @param {array} src - input image
+ * @param {array} dest - output image
+ */
+function crosshair(src, dest) {
     let c = circles(src);
     let ch = draw_crosshair(c);
     
@@ -265,7 +289,7 @@ function compose(filter1, filter2) {
   };
 }
 
-install_filter(draw_picture);
+install_filter(crosshair);
 //install_filter(compose(color_rotate, flip_vertically));
 
 // uncomment the following line to use a still image instead of video:
