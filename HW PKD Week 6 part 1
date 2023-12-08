@@ -1,95 +1,119 @@
 // DATA SPECIFICATION AND EXAMPLES
+/**
+ * A {Course} is ...
+ */
 
-
-// 0 - courses, 
-// 1 - max number of students
-// 2 - students 
-// 3 - wait list
+// 0 - course code
+// 1 - course name
+// 2 - max number of students
+// 3 - students 
+// 4 - wait list
 let courses = [
-    ["1DL201", 20, [], []],
-    ["1MA004", 10, [], []],
-    ["1MA010", 3, [], []]
+    ["1DL201", "Programkonstruktion och Datastrukturer", 20, [], []],
+    ["1MA004", "Algebra 1", 10, [], []],
+    ["1MA010", "Baskurs i Matematik", 3, [], []]
 ];
 
-let max_students = 3;
+let max_students = [];
 let students = [];
 let wait_list = [];
 
-function apply(name, ssn, code) { // edit freely, but do not rename
-    let courseExist = false;
+// Helper function to check if course exists.
+function is_course(code) {
     for (let i = 0; array_length(courses) > i; i = i + 1) {
         if(courses[i][0] === code) {
-            courseExist = true;
+            return true;
         }
     }
-    
-    if (!courseExist) {
-        display("Class does not exist.");
-        return false;
-    }
-    
-    //let result = [];
-    for (let i = 0; i < array_length(courses); i = i + 1) {
-        
-        if (courses[i][0] === code) {
+    display("Course does not exist.");
+    return false;
+}
+
+/**
+ * Applies a student to a course.
+ * @example
+ * // Applies "Oliver" "19941208-1234" to "1DL201"
+ * apply("Oliver", "19941208-1234", "1DL201");
+ * @param {string} ssn - Social security number of student to be applied.
+ * @param {string} code - Course code for course to be applied to.
+ */
+function apply(name, ssn, code) { // edit freely, but do not rename
+    if (is_course(code)) {
+        for (let i = 0; i < array_length(courses); i = i + 1) {
             
-            if (array_length(courses[i][2]) >= courses[i][1]) {
-                let wait_position = array_length(courses[i][3]);
-                courses[i][3][wait_position] = [name, ssn];
-            } else {
-                let class_position = array_length(courses[i][2]);
-                courses[i][2][class_position] = [name, ssn];
+            if (courses[i][0] === code) {
+                
+                if (array_length(courses[i][3]) >= courses[i][2]) {
+                    let wait_position = array_length(courses[i][4]);
+                    courses[i][4][wait_position] = [name, ssn];
+                } else {
+                    let class_position = array_length(courses[i][3]);
+                    courses[i][3][class_position] = [name, ssn];
+                }
             }
         }
+        display_courses(courses);
     }
-    
-    display(courses);
 }
 
-//let reg_ssn = new RegExp("^[0-9]{8}[-]{1}[0-9]{4}$");
-//let reg_name = new RegExp("^[a-zA-ZåäöÅÄÖ]$");
-
-// FUNCTION SPECIFICATION AND IMPLEMENTATION
-//function apply(name, ssn, code) { // edit freely, but do not rename
-//    if (array_length(students) >= max_studens) {
-//        let wait_position = array_length(wait_list);
-//        wait_list[wait_position] = [name, ssn, code];
-//    }
-//    
-//    //if (!reg_name.test(name) || !reg_ssn.test(ssn)) {
-//    //    return false;
-//    //}
-//    
-//    let position = array_length(students);
-//    students[position] = [name, ssn, code];
-//    display("students: " + stringify(students));
-//    display("wait list: " + stringify(wait_list));
-//}
-
-function withdraw(name) {
-
-    let result = [];
-    for (let i = 0; i < array_length(students); i = i + 1) {
-        if (students[i][0] !== name) {
-            let position = array_length(result);
-            result[position] = students[i];
+// Helper function to format output nicely.
+function display_courses(courses) {
+    display("Courses:");
+    for (let i = 0; i < array_length(courses); i = i + 1) {
+        display(courses[i][1]);
+        display("Students:");
+        for (let j = 0; j < array_length(courses[i][3]); j = j + 1) {
+            display(courses[i][3][j][0]);
+        }
+        display("Waitlist:");
+        for (let j = 0; j < array_length(courses[i][4]); j = j + 1) {
+            display(courses[i][4][j][0]);
         }
     }
+}
 
-    display(result);
-} // edit freely, but do not rename
+/**
+ * Withdraw a student from a course.
+ * @example
+ * // Removes "19670702-1234" from "1DL201"
+ * withdraw("19670702-1234", "1DL201");
+ * @param {string} ssn - Social security number of student to be withdrawn.
+ * @param {string} code - Course code for course to be withdrawn from.
+ */
+function withdraw(ssn, code) { // edit freely, but do not rename
+    let result = [];
+    
+    if (is_course(code)) {
+        for (let i = 0; i < array_length(courses); i = i + 1) {
+            if (courses[i][0] === code) {
+                for (let j = 0; j < array_length(courses[i][3]); j = j + 1) {
+                    if (courses[i][3][j][1] !== ssn) {
+                        let position = array_length(result);
+                        result[position] = courses[i][3][j];
+                    }
+                }
+                courses[i][3] = result;
+            }
+        }
+        
+        display_courses(courses);
+    }
+}
 
-
-function test_fail() {
+// TESTS
+function test_apply_fail() {
     
 }
 
-function test_success() {
+function test_remove_fail() {
+    
+}
+
+function test_apply_success() {
     
     courses = [
         [
-            "1DL201", 
-            3, 
+            "1DL201", "Programkonstruktion och Datastrukturer", 3, 
             [
                 ["Arne", "19941208-1234"],
                 ["Test", "19670702-1234"],
@@ -97,10 +121,8 @@ function test_success() {
             ], 
             []
         ],
-        [
-            "1MA004", 10, [], []],
-        [
-            "1MA010", 3, [], []]
+        ["1MA004", "Algebra 1", 10, [], []],
+        ["1MA010", "Baskurs i Matematik", 3, [], []]
     ];
     
     apply("Oliver", "19941208-1234", "1DL201");
@@ -108,19 +130,17 @@ function test_success() {
 
 function test_remove_success() {
    
-   students = [
+   courses[0][3] = [
         ["Arne", "19941208-1234", "1DL201"],
         ["Test", "19670702-1234", "1MA004"],
         ["Kent", "19891118-1234", "1MA010"]
        ];
        
-   withdraw("Arne");
+   withdraw("19670702-1234", "1DL201");
 }
 
-// TESTS
-//display(withdraw(), "Test Withdraw 1: "); // edit freely, and add more tests.
-test_success();
-//test_remove_success();
 
-// TESTS
 //display(withdraw(), "Test Withdraw 1: "); // edit freely, and add more tests.
+//test_apply_success();
+test_remove_success();
+
