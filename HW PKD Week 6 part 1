@@ -1,0 +1,126 @@
+// DATA SPECIFICATION AND EXAMPLES
+
+
+// 0 - courses, 
+// 1 - max number of students
+// 2 - students 
+// 3 - wait list
+let courses = [
+    ["1DL201", 20, [], []],
+    ["1MA004", 10, [], []],
+    ["1MA010", 3, [], []]
+];
+
+let max_students = 3;
+let students = [];
+let wait_list = [];
+
+function apply(name, ssn, code) { // edit freely, but do not rename
+    let courseExist = false;
+    for (let i = 0; array_length(courses) > i; i = i + 1) {
+        if(courses[i][0] === code) {
+            courseExist = true;
+        }
+    }
+    
+    if (!courseExist) {
+        display("Class does not exist.");
+        return false;
+    }
+    
+    //let result = [];
+    for (let i = 0; i < array_length(courses); i = i + 1) {
+        
+        if (courses[i][0] === code) {
+            
+            if (array_length(courses[i][2]) >= courses[i][1]) {
+                let wait_position = array_length(courses[i][3]);
+                courses[i][3][wait_position] = [name, ssn];
+            } else {
+                let class_position = array_length(courses[i][2]);
+                courses[i][2][class_position] = [name, ssn];
+            }
+        }
+    }
+    
+    display(courses);
+}
+
+//let reg_ssn = new RegExp("^[0-9]{8}[-]{1}[0-9]{4}$");
+//let reg_name = new RegExp("^[a-zA-ZåäöÅÄÖ]$");
+
+// FUNCTION SPECIFICATION AND IMPLEMENTATION
+//function apply(name, ssn, code) { // edit freely, but do not rename
+//    if (array_length(students) >= max_studens) {
+//        let wait_position = array_length(wait_list);
+//        wait_list[wait_position] = [name, ssn, code];
+//    }
+//    
+//    //if (!reg_name.test(name) || !reg_ssn.test(ssn)) {
+//    //    return false;
+//    //}
+//    
+//    let position = array_length(students);
+//    students[position] = [name, ssn, code];
+//    display("students: " + stringify(students));
+//    display("wait list: " + stringify(wait_list));
+//}
+
+function withdraw(name) {
+
+    let result = [];
+    for (let i = 0; i < array_length(students); i = i + 1) {
+        if (students[i][0] !== name) {
+            let position = array_length(result);
+            result[position] = students[i];
+        }
+    }
+
+    display(result);
+} // edit freely, but do not rename
+
+
+function test_fail() {
+    
+}
+
+function test_success() {
+    
+    courses = [
+        [
+            "1DL201", 
+            3, 
+            [
+                ["Arne", "19941208-1234"],
+                ["Test", "19670702-1234"],
+                ["Kent", "19891118-1234"]
+            ], 
+            []
+        ],
+        [
+            "1MA004", 10, [], []],
+        [
+            "1MA010", 3, [], []]
+    ];
+    
+    apply("Oliver", "19941208-1234", "1DL201");
+}
+
+function test_remove_success() {
+   
+   students = [
+        ["Arne", "19941208-1234", "1DL201"],
+        ["Test", "19670702-1234", "1MA004"],
+        ["Kent", "19891118-1234", "1MA010"]
+       ];
+       
+   withdraw("Arne");
+}
+
+// TESTS
+//display(withdraw(), "Test Withdraw 1: "); // edit freely, and add more tests.
+test_success();
+//test_remove_success();
+
+// TESTS
+//display(withdraw(), "Test Withdraw 1: "); // edit freely, and add more tests.
