@@ -5,7 +5,7 @@
  * the second is their National Insurance Number, or "personnummer".
  * Invariant:
  *   Both elements in the array are strings.
- *   The NIN is 
+ *   The NIN is in valid format with 12 numbers.
  */
  
 // const student = ["Arne", "19941208-1234"]; // Valid
