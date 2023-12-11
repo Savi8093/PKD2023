@@ -1,0 +1,216 @@
+// DATA SPECIFICATION AND EXAMPLES
+ /**
+ * A {Student} is an array with three elements. 
+ * The first is the students name,
+ * the second is their National Insurance Number, or "personnummer",
+ * The third is their GPA (grade point average).
+ * Invariant:
+ *   The first two elements in the array are strings.
+ *   The third element (GPA) is a floating point number.
+ *   The NIN is unique and in valid format with 12 numbers.
+ */
+ 
+// const student = ["Arne", "19941208-1234"]; // Valid
+// const student = ["19941208-1234", "Arne"]; // Invalid, wrong order
+// const student = ["Arne", "Karlsson"]; // Invalid, no NIN.
+ 
+/**
+ * A {Course} is an array with five elements.
+ * The first two describe the course and the last 3 contain information about
+ * the {Student}s applied to it.
+ * Invariant:
+ *   The first element is a string and contains the course's identifying code.
+ *   The second is also a string and is the name of the course.
+ *   The third is a number and represents the max number of students
+ *   The fourth is an array with all the applied {Student}s
+ *   The fifth is an array with all the {Student}s in the waiting list.
+ */
+
+/**
+ * // Valid
+ * const course = ["1DL201",
+ *                  "Programkonstruktion och Datastrukturer",
+ *                  20,
+ *                  [],
+ *                 []]
+ * // Borderline, a course without a name is technically allowed but not very
+ *    practical. As well a course with 0 max students.
+ * const course = ["",
+ *                 "",
+ *                 0,
+ *                 [],
+ *                 [["Arne", "19941208-1234"]]]
+ * // Invalid, course id is a number, and there are more students enrolled than
+ *    allowed (0).
+ * const course = [13,
+ *                 "Dinkelhopp",
+ *                 0,
+ *                 [["Arne", "19941208-1234"], ["Arne", "19941208-1234"]],
+ *                 []]
+*/
+
+// FUNCTION SPECIFICATION AND IMPLEMENTATION
+
+// Helper function to check if course exists.
+function is_course(code) {
+    for (let i = 0; array_length(courses) > i; i = i + 1) {
+        if(courses[i][0] === code) {
+            return true;
+        }
+    }
+    display("Course does not exist.");
+    return false;
+}
+
+/**
+ * Applies a student to a course.
+ * @example
+ * // Applies "Oliver" "19941208-1234" to "1DL201"
+ * apply("Oliver", "19941208-1234", "1DL201");
+ * @param {string} ssn - Social security number of student to be applied.
+ * @param {string} code - Course code for course to be applied to.
+ */
+function apply(student, code) { // edit freely, but do not rename
+    if (is_course(code)) {
+        for (let i = 0; i < array_length(courses); i = i + 1) {
+            
+            if (courses[i][0] === code) {
+                let wait_position = array_length(courses[i][4]);
+                courses[i][4][wait_position] = student;
+                return courses[i];
+            }
+        }
+    }
+}
+
+/**
+ * Withdraw a student from a course.
+ * @example
+ * // Removes "19670702-1234" from "1DL201"
+ * withdraw("19670702-1234", "1DL201");
+ * @param {string} ssn - Social security number of student to be withdrawn.
+ * @param {string} code - Course code for course to be withdrawn from.
+ */
+function withdraw(ssn, code) { // edit freely, but do not rename
+    let result = [];
+    
+    if (is_course(code)) {
+        for (let i = 0; i < array_length(courses); i = i + 1) {
+            if (courses[i][0] === code) {
+                for (let j = 0; j < array_length(courses[i][3]); j = j + 1) {
+                    if (courses[i][3][j][1] !== ssn) {
+                        let position = array_length(result);
+                        result[position] = courses[i][3][j];
+                    }
+                }
+                courses[i][3] = result;
+                return courses[i];
+            }
+        }
+    }
+}
+
+// Insertion sort from lecture F6B.
+function insertion_sort(A) {
+    const len = array_length(A);
+
+    for (let i = 1; i < len; i = i + 1) {
+        let j = i - 1;
+        while (j >= 0 && A[j] > A[j + 1]) {
+            swap(A, j, j + 1);
+            j = j - 1;
+        }
+    }
+}
+
+// Helper function to insertion sort from lecture F6B.
+function swap(A, x, y) {
+    const temp = A[x];
+    A[x] = A[y];
+    A[y] = temp;
+}
+
+function admit() { // edit freely, but do not rename
+    for (let i = 0; i < array_length(courses); i = i + 1) {
+        insertion_sort(courses[i][4]);
+        
+    }
+} 
+
+// TESTS
+
+// Data to test with
+// 0 - course code
+// 1 - course name
+// 2 - max number of students
+// 3 - students 
+// 4 - wait list
+let courses = [
+    ["1DL201", "Programkonstruktion och Datastrukturer", 20, [], []],
+    ["1MA004", "Algebra 1", 10, [], []],
+    ["1MA010", "Baskurs i Matematik", 3, [], []]
+];
+
+courses[0][4] = [
+        ["Arne", "19941208-1234", 20],
+        ["Anna", "19670702-1234", 19],
+        ["Kent", "19891118-1234", 19.5]
+       ];
+courses[1][4] = [
+        ["Linda", "20031202-1234", 17],
+        ["Bodil", "20021005-1234", 16.5],
+        ["Rutger", "19970318-1234", 12]
+       ];
+courses[2][4] = [
+        ["Harald", "19901127-1234", 10],
+        ["Gösta", "20011015-1234", 15],
+        ["Gunnar", "19960528-1234", 16]
+       ];
+
+display(apply(["Oliver", "19941208-1234", 17.5], "1DL201"), "Test Apply 1:");
+/**
+ * // Expected output: 
+ * Test Apply 1: [ "1DL201",
+ *  "Programkonstruktion och Datastrukturer",
+ *  20,
+ *  [ ["Arne", "19941208-1234"],
+ *    ["Anna", "19670702-1234"],
+ *    ["Kent", "19891118-1234"],
+ *    ["Oliver", "19941208-1234"]],
+ *  []]
+*/
+
+display(apply(["Oliver", "19941208-1234", 15.5], "1MA010"), "Test Apply 2:");
+/**
+ * // Expected output: 
+ * Test Apply 2: [ "1MA010",
+ *  "Baskurs i Matematik",
+ *  3,
+ *  [ ["Harald", "19901127-1234"],
+ *    ["Gösta", "20011015-1234"],
+ *    ["Gunnar", "19960528-1234"]],
+ *  [["Oliver", "19941208-1234"]]]
+*/
+
+display(apply(["Mikaela", "20020723-1234", 18.0], ""), "Test Apply 3: ");
+/**
+ * // Expected output:
+ * "Course does not exist."
+ * Test Apply 3 undefined
+*/
+display(withdraw("19670702-1234", "1DL201"), "Test Withdraw 1: "); // edit freely, and add more tests.
+/**
+ * // Expected output:
+ * Test Withdraw 1:  [ "1DL201",
+ *  "Programkonstruktion och Datastrukturer",
+ *  20,
+ *  [ ["Arne", "19941208-1234"],
+ *    ["Kent", "19891118-1234"],
+ *    ["Oliver", "19941208-1234"]],
+ *  []]
+*/
+
+display(admit());
+
+
+
