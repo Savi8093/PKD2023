@@ -109,21 +109,80 @@ function withdraw(ssn, code) { // edit freely, but do not rename
         }
     }
 }
-
-// Insertion sort from lecture F6B.
-function insertion_sort(A) {
-    const len = array_length(A);
-
-    for (let i = 1; i < len; i = i + 1) {
-        let j = i - 1;
-        while (j >= 0 && A[j] > A[j + 1]) {
-            swap(A, j, j + 1);
-            j = j - 1;
-        }
-    }
+/**
+ * Sorts the elements in an array in-place in ascending order.
+ * @example
+ * const arr = [20, 16, 27, 39, 12, 27];
+ * quick_sort(arr); // arr becomes [12, 16, 20, 27, 27, 39]
+ * @param {array} A - array to be sorted
+ */
+function quick_sort(A) {
+    quick_sort_helper(A, 0, array_length(A) - 1);
 }
 
-// Helper function to insertion sort from lecture F6B.
+/**
+ * Sorts the elements in a portion of an array in-place in
+ * ascending order.
+ * @example
+ * const arr = [20, 16, 27, 39, 12, 27];
+ * quick_sort_helper(arr, 0, 2); // arr becomes [16, 20, 27, 39, 12, 27]
+ * @param {array} A - array to be sorted
+ * @param {number} low - starting index in A to be sorted
+ * @param {number} high - end index in A to be sorted
+ */
+function quick_sort_helper(A, low, high) {
+    if (low < high) {
+        const pivot_index = partition(A, low, high);
+        quick_sort_helper(A, low, pivot_index - 1);
+        quick_sort_helper(A, pivot_index + 1, high);
+    } else {}
+}
+
+/**
+ * Swaps a portion of an array (in-place) based on the first value
+ * in the portion (the pivot) such that values smaller/larger than
+ * the pivot come before/after the pivot, respectively.
+ * @precondition low < high
+ * @example
+ * const arr = [20, 16, 27, 39, 12, 27];
+ * quick_sort_helper(arr, 0, 5); // arr becomes [12, 16, 20, 39, 27, 27]
+ * @param {array} A - array to be partitioned
+ * @param {number} low - starting index in A to be partitioned
+ * @param {number} high - end index in A to be partitioned
+ */
+ 
+// ["Arne", "19941208-1234", 20],
+// ["Anna", "19670702-1234", 19],
+// ["Kent", "19891118-1234", 19.5],
+// ["Oliver", "19941208-1234", 17.5]]
+function partition(A, low, high) {
+    const pivot = A[low][2];
+    
+    // index of last element smaller than pivot
+    let swap_index = low;
+    for (let i = low + 1; i <= high; i = i + 1) {
+        if (pivot < A[i][2]) {
+            swap_index = swap_index + 1;
+            if (i !== swap_index) {
+                swap(A, i, swap_index);
+            }
+        }
+    }
+    if (swap_index !== low) {
+    // swap pivot into correct place
+        swap(A, swap_index, low);
+    }
+    return swap_index;
+}
+/**
+ * Swaps the values at indices x and y in the array A.
+ * @example
+ * // results in array [1, 3, 2, 4]
+ * swap([1, 2, 3, 4], 1, 2);
+ * @param {array} A - array to be modified
+ * @param {number} x - index to be swapped
+ * @param {number} y - index to be swapped
+ */
 function swap(A, x, y) {
     const temp = A[x];
     A[x] = A[y];
@@ -132,10 +191,38 @@ function swap(A, x, y) {
 
 function admit() { // edit freely, but do not rename
     for (let i = 0; i < array_length(courses); i = i + 1) {
-        insertion_sort(courses[i][4]);
+        quick_sort(courses[i][4]);
         
+        let new_wait_list = [];
+        for (let y = 0; y < array_length(courses[i][4]); y = y + 1) {
+            if (array_length(courses[i][3]) < courses[i][2]) {
+                courses[i][3][array_length(courses[i][3])] = courses[i][4][y];
+            } else {
+                new_wait_list[array_length(new_wait_list)] = courses[i][4][y];
+            }
+        }
+        
+        courses[i][4] = new_wait_list;
     }
+    
+    display_courses(courses);
 } 
+
+// Helper function to format output nicely.
+function display_courses(courses) {
+    display("Courses:");
+    for (let i = 0; i < array_length(courses); i = i + 1) {
+        display(courses[i][1]);
+        display("Students:");
+        for (let j = 0; j < array_length(courses[i][3]); j = j + 1) {
+            display(courses[i][3][j]);
+        }
+        display("Waitlist:");
+        for (let j = 0; j < array_length(courses[i][4]); j = j + 1) {
+            display(courses[i][4][j]);
+        }
+    }
+}
 
 // TESTS
 
@@ -211,6 +298,3 @@ display(withdraw("19670702-1234", "1DL201"), "Test Withdraw 1: "); // edit freel
 */
 
 display(admit());
-
-
-
