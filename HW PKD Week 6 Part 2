@@ -1,3 +1,5 @@
+// TO BE GRADED Märta Ågren Sandra Victorsson
+
 // DATA SPECIFICATION AND EXAMPLES
  /**
  * A {Student} is an array with three elements. 
@@ -10,9 +12,11 @@
  *   The NIN is unique and in valid format with 12 numbers.
  */
  
-// const student = ["Arne", "19941208-1234"]; // Valid
-// const student = ["19941208-1234", "Arne"]; // Invalid, wrong order
+// const student = ["Arne", "19941208-1234", 20]; // Valid
+// const student = ["19941208-1234", "Arne", 20]; // Invalid, wrong order
 // const student = ["Arne", "Karlsson"]; // Invalid, no NIN.
+// const student = ["Arne", "19941208-1234", "gpa"]; // Invalid, GPA is a string.
+
  
 /**
  * A {Course} is an array with five elements.
@@ -29,9 +33,9 @@
 /**
  * // Valid
  * const course = ["1DL201",
- *                  "Programkonstruktion och Datastrukturer",
- *                  20,
- *                  [],
+ *                 "Programkonstruktion och Datastrukturer",
+ *                 20,
+ *                 [],
  *                 []]
  * // Borderline, a course without a name is technically allowed but not very
  *    practical. As well a course with 0 max students.
@@ -69,6 +73,7 @@ function is_course(code) {
  * apply("Oliver", "19941208-1234", "1DL201");
  * @param {string} ssn - Social security number of student to be applied.
  * @param {string} code - Course code for course to be applied to.
+ * @returns {array} Returns the updated array of the course being applied to.
  */
 function apply(student, code) { // edit freely, but do not rename
     if (is_course(code)) {
@@ -90,6 +95,7 @@ function apply(student, code) { // edit freely, but do not rename
  * withdraw("19670702-1234", "1DL201");
  * @param {string} ssn - Social security number of student to be withdrawn.
  * @param {string} code - Course code for course to be withdrawn from.
+ * @returns {array} Returns the updated array of the course being withdrawn from.
  */
 function withdraw(ssn, code) { // edit freely, but do not rename
     let result = [];
@@ -97,6 +103,16 @@ function withdraw(ssn, code) { // edit freely, but do not rename
     if (is_course(code)) {
         for (let i = 0; i < array_length(courses); i = i + 1) {
             if (courses[i][0] === code) {
+                // Check waitlist first
+                for (let j = 0; j < array_length(courses[i][4]); j = j + 1) {
+                    if (courses[i][4][j][1] !== ssn) {
+                        let position = array_length(result);
+                        result[position] = courses[i][4][j];
+                    }
+                }
+                courses[i][4] = result;
+                result = [];
+                // Check admitted list as well.
                 for (let j = 0; j < array_length(courses[i][3]); j = j + 1) {
                     if (courses[i][3][j][1] !== ssn) {
                         let position = array_length(result);
@@ -109,6 +125,7 @@ function withdraw(ssn, code) { // edit freely, but do not rename
         }
     }
 }
+
 /**
  * Sorts the elements in an array in-place in ascending order.
  * @example
@@ -150,14 +167,9 @@ function quick_sort_helper(A, low, high) {
  * @param {number} low - starting index in A to be partitioned
  * @param {number} high - end index in A to be partitioned
  */
- 
-// ["Arne", "19941208-1234", 20],
-// ["Anna", "19670702-1234", 19],
-// ["Kent", "19891118-1234", 19.5],
-// ["Oliver", "19941208-1234", 17.5]]
 function partition(A, low, high) {
     const pivot = A[low][2];
-    
+
     // index of last element smaller than pivot
     let swap_index = low;
     for (let i = low + 1; i <= high; i = i + 1) {
@@ -189,6 +201,12 @@ function swap(A, x, y) {
     A[y] = temp;
 }
 
+/**
+ * Admits all students to all courses until max students for a course is
+ * reached. Students with a higher GPA are admitted first.
+ * @example
+ * @returns {array} Returns the updated courses array.
+ */
 function admit() { // edit freely, but do not rename
     for (let i = 0; i < array_length(courses); i = i + 1) {
         quick_sort(courses[i][4]);
@@ -201,28 +219,10 @@ function admit() { // edit freely, but do not rename
                 new_wait_list[array_length(new_wait_list)] = courses[i][4][y];
             }
         }
-        
         courses[i][4] = new_wait_list;
     }
-    
-    display_courses(courses);
+    return courses;
 } 
-
-// Helper function to format output nicely.
-function display_courses(courses) {
-    display("Courses:");
-    for (let i = 0; i < array_length(courses); i = i + 1) {
-        display(courses[i][1]);
-        display("Students:");
-        for (let j = 0; j < array_length(courses[i][3]); j = j + 1) {
-            display(courses[i][3][j]);
-        }
-        display("Waitlist:");
-        for (let j = 0; j < array_length(courses[i][4]); j = j + 1) {
-            display(courses[i][4][j]);
-        }
-    }
-}
 
 // TESTS
 
@@ -254,29 +254,30 @@ courses[2][4] = [
         ["Gunnar", "19960528-1234", 16]
        ];
 
-display(apply(["Oliver", "19941208-1234", 17.5], "1DL201"), "Test Apply 1:");
+display(apply(["Oliver", "19941228-1234", 15.5], "1DL201"), "Test Apply 1:");
 /**
  * // Expected output: 
  * Test Apply 1: [ "1DL201",
  *  "Programkonstruktion och Datastrukturer",
  *  20,
- *  [ ["Arne", "19941208-1234"],
- *    ["Anna", "19670702-1234"],
- *    ["Kent", "19891118-1234"],
- *    ["Oliver", "19941208-1234"]],
- *  []]
+ *  [],
+ *  [ ["Arne", "19941208-1234", 20],
+ *    ["Anna", "19670702-1234", 19],
+ *    ["Kent", "19891118-1234", 19.5],
+ *    ["Oliver", "19941228-1234", 15.5]]]
 */
 
-display(apply(["Oliver", "19941208-1234", 15.5], "1MA010"), "Test Apply 2:");
+display(apply(["Oliver", "19941228-1234", 15.5], "1MA010"), "Test Apply 2:");
 /**
  * // Expected output: 
  * Test Apply 2: [ "1MA010",
  *  "Baskurs i Matematik",
  *  3,
- *  [ ["Harald", "19901127-1234"],
- *    ["Gösta", "20011015-1234"],
- *    ["Gunnar", "19960528-1234"]],
- *  [["Oliver", "19941208-1234"]]]
+ *  [],
+ *  [ ["Harald", "19901127-1234", 17],
+ *    ["Gösta", "20011015-1234", 16.5],
+ *    ["Gunnar", "19960528-1234"], 12,
+ *    ["Oliver", "19941228-1234", 15.5]]]
 */
 
 display(apply(["Mikaela", "20020723-1234", 18.0], ""), "Test Apply 3: ");
@@ -285,16 +286,42 @@ display(apply(["Mikaela", "20020723-1234", 18.0], ""), "Test Apply 3: ");
  * "Course does not exist."
  * Test Apply 3 undefined
 */
-display(withdraw("19670702-1234", "1DL201"), "Test Withdraw 1: "); // edit freely, and add more tests.
+display(withdraw("19670702-1234", "1DL201"), "Test Withdraw 1: ");
 /**
  * // Expected output:
  * Test Withdraw 1:  [ "1DL201",
  *  "Programkonstruktion och Datastrukturer",
  *  20,
- *  [ ["Arne", "19941208-1234"],
- *    ["Kent", "19891118-1234"],
- *    ["Oliver", "19941208-1234"]],
- *  []]
+ *  [],
+ *  [ ["Arne", "19941208-1234", 20],
+ *    ["Kent", "19891118-1234", 19.5],
+ *    ["Oliver", "19941228-1234", 15.5]]]
 */
 
-display(admit());
+display(admit(), "Test admit 1: ");
+/** 
+ * //Expected output:
+ * Test admit 1:  [ [ "1DL201",
+ *    "Programkonstruktion och Datastrukturer",
+ *    20,
+ *    [ ["Arne", "19941208-1234", 20],
+ *      ["Kent", "19891118-1234", 19.5],
+ *      ["Oliver", "19941228-1234", 15.5]],
+ *    []],
+ *  [ "1MA004",
+ *    "Algebra 1",
+ *    10,
+ *    [ ["Linda", "20031202-1234", 17],
+ *      ["Bodil", "20021005-1234", 16.5],
+ *      ["Rutger", "19970318-1234", 12]],
+ *    []],
+ *  [ "1MA010",
+ *    "Baskurs i Matematik",
+ *    3,
+ *    [ ["Gunnar", "19960528-1234", 16],
+ *      ["Oliver", "19941228-1234", 15.5],
+ *      ["Gösta", "20011015-1234", 15],],
+ *    [ ["Harald", "19901127-1234", 10]]]]
+ */
+
+
