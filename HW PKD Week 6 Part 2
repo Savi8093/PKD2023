@@ -126,6 +126,7 @@ function withdraw(ssn, code) { // edit freely, but do not rename
     }
 }
 
+// From exercises week 6
 /**
  * Sorts the elements in an array in-place in ascending order.
  * @example
@@ -137,6 +138,7 @@ function quick_sort(A) {
     quick_sort_helper(A, 0, array_length(A) - 1);
 }
 
+// From exercises week 6
 /**
  * Sorts the elements in a portion of an array in-place in
  * ascending order.
@@ -155,6 +157,7 @@ function quick_sort_helper(A, low, high) {
     } else {}
 }
 
+// From exercises week 6
 /**
  * Swaps a portion of an array (in-place) based on the first value
  * in the portion (the pivot) such that values smaller/larger than
@@ -186,6 +189,8 @@ function partition(A, low, high) {
     }
     return swap_index;
 }
+
+// From exercises week 6
 /**
  * Swaps the values at indices x and y in the array A.
  * @example
@@ -204,7 +209,6 @@ function swap(A, x, y) {
 /**
  * Admits all students to all courses until max students for a course is
  * reached. Students with a higher GPA are admitted first.
- * @example
  * @returns {array} Returns the updated courses array.
  */
 function admit() { // edit freely, but do not rename
@@ -323,5 +327,8 @@ display(admit(), "Test admit 1: ");
  *      ["Gösta", "20011015-1234", 15],],
  *    [ ["Harald", "19901127-1234", 10]]]]
  */
+
+
+
 
 
