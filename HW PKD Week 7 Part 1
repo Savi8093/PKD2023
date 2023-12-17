@@ -1,0 +1,82 @@
+// pre-defined for you:
+//const temp_readings_stream = ...
+//const temp_readings_stream2 = ...
+//const temp_readings_stream3 = ...
+
+/**
+ * Simple thermostat function.
+ * @param {number} set_temp - The target room temperature
+ * @param {number} room_temp - The current room temperature
+ * @param {number} outside_temp - not used
+ * @returns {number} Returns a thermostat setting as a whole integer between
+ * 0 - 20 (inclusive) so as to minimize the temperature difference between
+ * `set_temp` and `room_temp`.
+ */
+function thermostat_naive(set_temp, room_temp, outside_temp) {
+    const delta = math_ceil(set_temp - room_temp);
+    return math_max(0, math_min(20, delta));
+}
+
+/**
+ * Improved thermostat function.
+ * @param {number} set_temp - The target room temperature
+ * @param {number} room_temp - The current room temperature
+ * @param {number} outside_temp - Not used
+ * @returns {number} Returns a thermostat setting as a whole integer between
+ * 0 - 20 to maintain the room temperature between 18.5 and 22.5 degrees.
+ */
+function thermostat_better(set_temp, room_temp, outside_temp) {
+    const temp_difference = set_temp - room_temp;
+
+    if (room_temp < 18.5) {
+        return math_min(20, math_ceil(temp_difference + 2));
+    } else if (room_temp > 22.5) {
+        return 0;
+    } else {
+        return math_max(0, math_min(20, math_ceil(temp_difference)));
+    }
+}
+
+
+/**
+ * Simulates the temperature in a room based on outside temperatures and
+ * a thermostat-controlled heating.
+ * Computes the room temperature as a stream where one entry in the stream
+ * corresponds to the average temperature in the room for one day.
+ *
+ * @param {number} set_temp - Target temperature to keep in the room
+ * @param {number} current_room_temp - Room temperature on the previous day
+ * @param {Function} thermostat - A function that returns the thermostat
+ * setting between 0 - 20 to control the heating.
+ * @param {Stream} outside_temp - A stream of outside temperatures (one entry
+ * per day).
+ * @returns {Stream} Returns a stream of room temperatures (numbers).
+ */
+function room_temperature(set_temp, current_room_temp, thermostat, outside_temp) {
+    // Helper function to calculate the new room temperature
+    function calculate_new_temperature(current_room_temp, outside_temp, thermostat_setting) {
+        const cooling = (current_room_temp - outside_temp) * 0.5;
+        const heating = thermostat_setting;
+        return current_room_temp - cooling + heating;
+    }
+
+    return stream_map((outside_temp) => {
+        const thermostat_setting = thermostat(set_temp, current_room_temp, outside_temp);
+        current_room_temp = calculate_new_temperature(current_room_temp, outside_temp, thermostat_setting);
+        return current_room_temp;
+    }, outside_temp);
+}
+
+const set_temperature = 20;
+const temp_stream = temp_readings_stream;
+// const temp_stream = temperature(20);  // using the infinite stream
+
+// should produce a stream of values similar to:
+// 17, 19, 16.5, 17.25, 17.625, 17.3125, 16.65625, 16.328125, 15.1640625, ...
+//const naive_stream = room_temperature(set_temperature, 20, thermostat_naive,
+//                               temp_stream);
+
+// should produce a stream of values between [18.5, 22.5]
+const better_stream = room_temperature(set_temperature, 20, thermostat_better,
+                                temp_stream);
+eval_stream(better_stream, 10);
