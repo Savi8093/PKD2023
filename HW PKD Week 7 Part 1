@@ -1,4 +1,4 @@
-
+//TO BE GRADED Sandra Victorsson Märta Ågren
 // pre-defined for you:
 //const temp_readings_stream = ...
 //const temp_readings_stream2 = ...
@@ -84,4 +84,4 @@ const naive_stream = room_temperature(set_temperature, 20, thermostat_naive,
 // should produce a stream of values between [18.5, 22.5]
 const better_stream = room_temperature(set_temperature, 20, thermostat_better,
                                 temp_stream);
-eval_stream(better_stream, 30);
+eval_stream(better_stream, 10);
