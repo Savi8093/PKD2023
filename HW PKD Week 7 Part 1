@@ -1,3 +1,4 @@
+
 // pre-defined for you:
 //const temp_readings_stream = ...
 //const temp_readings_stream2 = ...
@@ -21,20 +22,15 @@ function thermostat_naive(set_temp, room_temp, outside_temp) {
  * Improved thermostat function.
  * @param {number} set_temp - The target room temperature
  * @param {number} room_temp - The current room temperature
- * @param {number} outside_temp - Not used
+ * @param {number} outside_temp - The current outside temperature
  * @returns {number} Returns a thermostat setting as a whole integer between
  * 0 - 20 to maintain the room temperature between 18.5 and 22.5 degrees.
  */
 function thermostat_better(set_temp, room_temp, outside_temp) {
-    const temp_difference = set_temp - room_temp;
-
-    if (room_temp < 18.5) {
-        return math_min(20, math_ceil(temp_difference + 2));
-    } else if (room_temp > 22.5) {
-        return 0;
-    } else {
-        return math_max(0, math_min(20, math_ceil(temp_difference)));
-    }
+    const cooling = (room_temp - outside_temp) * 0.5;   
+    const heating = set_temp - room_temp + cooling;
+    
+    return math_round(heating);
 }
 
 
@@ -52,31 +48,40 @@ function thermostat_better(set_temp, room_temp, outside_temp) {
  * per day).
  * @returns {Stream} Returns a stream of room temperatures (numbers).
  */
-function room_temperature(set_temp, current_room_temp, thermostat, outside_temp) {
+ 
+function room_temperature(set_temp, current_room_temp, thermostat,
+                          outside_temp) {
     // Helper function to calculate the new room temperature
-    function calculate_new_temperature(current_room_temp, outside_temp, thermostat_setting) {
+    function calculate_new_temperature(current_room_temp, outside_temp, 
+                                           thermostat_setting) {
         const cooling = (current_room_temp - outside_temp) * 0.5;
         const heating = thermostat_setting;
-        return current_room_temp - cooling + heating;
+        const new_room_temp = current_room_temp - cooling + heating;
+        
+        return new_room_temp;
+        
     }
 
-    return stream_map((outside_temp) => {
+   return stream_map((outside_temp) => {
         const thermostat_setting = thermostat(set_temp, current_room_temp, outside_temp);
-        current_room_temp = calculate_new_temperature(current_room_temp, outside_temp, thermostat_setting);
-        return current_room_temp;
+        current_room_temp = calculate_new_temperature(current_room_temp,
+                                                      outside_temp,
+                                                      thermostat_setting);
+        return math_round(current_room_temp * 10) / 10;  // Round to one decimal place
     }, outside_temp);
 }
 
 const set_temperature = 20;
-const temp_stream = temp_readings_stream;
-// const temp_stream = temperature(20);  // using the infinite stream
+
+const temp_stream = temp_readings_stream3;
+//const temp_stream = temperature(20);  // using the infinite stream
 
 // should produce a stream of values similar to:
 // 17, 19, 16.5, 17.25, 17.625, 17.3125, 16.65625, 16.328125, 15.1640625, ...
-//const naive_stream = room_temperature(set_temperature, 20, thermostat_naive,
-//                               temp_stream);
+const naive_stream = room_temperature(set_temperature, 20, thermostat_naive,
+                              temp_stream);
 
 // should produce a stream of values between [18.5, 22.5]
 const better_stream = room_temperature(set_temperature, 20, thermostat_better,
                                 temp_stream);
-eval_stream(better_stream, 10);
+eval_stream(better_stream, 30);
